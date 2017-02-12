@@ -94,7 +94,7 @@ fn estimate_influence(g: Graph<(), f32>,
     let mut degree = 0;
     let mut counter = 0;
     let step = 10_000;
-    let mut samples: Vec<BTreeSet<NodeIndex>> = Vec::with_capacity(step);
+    let mut samples: Vec<Vec<NodeIndex>> = Vec::with_capacity(step);
     while degree < upper {
         (0..step)
             .into_par_iter()
@@ -106,8 +106,11 @@ fn estimate_influence(g: Graph<(), f32>,
 
         for sample in &samples {
             counter += 1;
-            if sample.intersection(&seeds).take(1).count() > 0 {
-                degree += 1;
+            for node in sample.iter() {
+                if seeds.contains(&node) {
+                    degree += 1;
+                    break;
+                }
             }
             if degree >= upper {
                 break;
