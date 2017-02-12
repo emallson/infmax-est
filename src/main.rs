@@ -33,7 +33,7 @@ const USAGE: &'static str = "
 Estimate the actual influence of a given seed set.
 
 Usage:
-    est-inf <graph> <model> <epsilon> <delta> [--file <seedfile>] [--threads <threads>] [--log <file>]
+    est-inf <graph> <model> <epsilon> [<delta>] [--file <seedfile>] [--threads <threads>] [--log <file>]
     est-inf (-h | --help)
 
 Options:
@@ -48,7 +48,7 @@ struct Args {
     arg_graph: String,
     arg_model: Model,
     arg_epsilon: f64,
-    arg_delta: f64,
+    arg_delta: Option<f64>,
     flag_file: Option<String>,
     flag_log: Option<String>,
     flag_threads: Option<usize>,
@@ -147,10 +147,11 @@ fn main() {
     if let Some(file) = args.flag_file {
         let seeds = load_seeds(file).unwrap();
         info!(log, "seeds"; "input" => json_string(&seeds).unwrap(), "count" => seeds.len());
+        let delta = args.arg_delta.unwrap_or(1.0 / g.node_count() as f64);
         let inf = estimate_influence(g,
                                      seeds,
                                      args.arg_epsilon,
-                                     args.arg_delta,
+                                     delta,
                                      args.arg_model,
                                      log.new(o!("section" => "estimate influence")));
         info!(log, "estimated influence"; "inf" => inf);
